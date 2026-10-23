@@ -92,7 +92,7 @@ parte sem — normal e desejável.
 | Read model | DynamoDB `products-read` | Elasticsearch/Mongo/Redis |
 | Query API | `read_service.py` | Read service / BFF |
 
-Pontos de discussão para a mentoria com código na mão:
+Pontos de discussão para o estudo com código na mão:
 
 1. Onde o dual-write pode falhar aqui? (crash entre `put_item` e `sns.publish`)
 2. Como tornar a projeção idempotente e ordenada? (já é upsert por chave; falta version)

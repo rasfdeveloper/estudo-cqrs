@@ -1,12 +1,12 @@
 # Roteiro da demo ao vivo — CQRS com Floci
 
 > Roteiro pensado para apresentar em ~20–30 min. Cada etapa tem o que fazer,
-> o que mostrar e a pergunta para a mentoranda.
+> o que mostrar e a pergunta para quem está aprendendo.
 
 ## 0. Setup (antes de apresentar, ou junto)
 
 ```bash
-git clone <este-repo> && cd mentoria-cqrs
+git clone <este-repo> && cd estudo-cqrs
 docker compose up -d          # sobe floci + init (cria infra) + worker
 docker logs -f cqrs-worker    # deixe num terminal visível: "[worker] escutando..."
 ```
