@@ -1,6 +1,6 @@
-# Mentoria CQRS — Material de Estudo
+# Estudo CQRS — Material de Estudo
 
-Material de mentoria sobre **CQRS (Command Query Responsibility Segregation)**,
+Material de estudo sobre **CQRS (Command Query Responsibility Segregation)**,
 baseado no vídeo [CQRS: O PADRÃO ARQUITETURAL QUE TODO PROGRAMADOR PRECISA CONHECER!](https://www.youtube.com/watch?v=8Z8JAtEEan0)
 do Renato Augusto (YouTube), com uma **simulação prática local** usando
 [Floci](https://github.com/floci-io/floci) (emulador AWS local, fork livre do LocalStack).
@@ -78,7 +78,7 @@ Para resetar tudo: `docker compose down -v` (o init é idempotente, pode subir d
 
 `http://localhost:4566/_floci/ui` — inspeciona tabelas, filas e tópicos no navegador.
 
-## Roteiro sugerido para a mentoria
+## Roteiro sugerido para o estudo
 
 1. `docs/01-para-leigos.md` → entender o problema (por que um banco só não basta)
 2. Rodar a demo (`docs/03-roteiro-demo.md`) → ver a segregação acontecendo
