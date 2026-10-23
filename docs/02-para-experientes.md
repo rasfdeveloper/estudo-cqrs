@@ -1,6 +1,6 @@
 # CQRS para quem já manja — visão técnica
 
-> Base: vídeo do Renato Augusto + discussão de trade-offs. Figuras em `frames/`.
+> Base: vídeo do Renato Augusto + discussão de trade-offs. Diagramas recriados em Mermaid.
 
 ## O que o padrão resolve de verdade
 
@@ -29,7 +29,16 @@ Pergunta clássica de entrevista/design review. Réplica de leitura **copia bits
 eventos de domínio numa estrutura pensada para a consulta (ex.: item único com
 produto+estoque+preço+reputação do vendedor já resolvidos).
 
-![CQRS completo](frames/07-cqrs-diagrama-completo.png)
+```mermaid
+flowchart LR
+    GW[API Gateway] -->|comandos| WS[Write Service]
+    GW -->|consultas| RS[Read Service]
+    WS -->|Escritas| WDB[(Write Database<br/>normalizado)]
+    WS -->|publica evento| K{{Kafka / fila}}
+    K --> WK[Worker<br/>consome a fila]
+    WK -->|projeta| RDB[(Read Database<br/>desnormalizado)]
+    RS -->|Leituras| RDB
+```
 
 ## Mecânica de sincronização — 3 sabores
 
@@ -42,8 +51,22 @@ produto+estoque+preço+reputação do vendedor já resolvidos).
    eventos — zero acoplamento no código de aplicação, mas os eventos são
    físicos ("linha mudou") e não de domínio ("PreçoAlterado").
 
-![CDC](frames/04-cdc-change-data-capture.png)
-![Write service → Kafka](frames/06-write-service-publica-kafka.png)
+```mermaid
+flowchart LR
+    subgraph s1["1) publicação dupla (esta demo)"]
+        W1[Service] -->|commit| D1[(write DB)]
+        W1 -->|publish| B1{{broker}}
+    end
+    subgraph s2["2) transactional outbox"]
+        W2[Service] -->|"mesma tx"| D2[(write DB + outbox)]
+        R2[Relay] --> B2{{broker}}
+        D2 -.-> R2
+    end
+    subgraph s3["3) CDC (Debezium)"]
+        W3[Service] --> D3[(write DB)]
+        D3 -->|WAL/binlog| C3[Debezium] --> B3{{broker}}
+    end
+```
 
 ## Event Sourcing ≠ CQRS
 

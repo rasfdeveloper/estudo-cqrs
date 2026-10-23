@@ -1,7 +1,7 @@
 # CQRS para quem nunca viu — explicação leiga
 
 > Referência: vídeo do Renato Augusto — *"CQRS: O PADRÃO ARQUITETURAL QUE TODO PROGRAMADOR PRECISA CONHECER!"*
-> (transcrição completa em `transcricao.md`, figuras em `frames/`)
+> (transcrição completa em `transcricao.md`; os diagramas aqui são recriados em Mermaid)
 
 ## A analogia: a cozinha do restaurante
 
@@ -30,7 +30,12 @@ nome: **consistência eventual**.
 
 ## O problema que o vídeo mostra
 
-![Arquitetura tradicional](frames/01-arquitetura-tradicional.png)
+```mermaid
+flowchart LR
+    C([Client]) -->|HTTP request| S[Server]
+    S -->|"Escritas + Leituras (CRUD)"| DB[(Database)]
+    DB -.-> T["orders · products · stock · customers<br/>payments · shipments · invoices"]
+```
 
 Todo mundo aprende assim: front-end → back-end → **um banco só**. Esse banco
 recebe `INSERT/UPDATE` (escrita) **e** `SELECT` (leitura) ao mesmo tempo.
@@ -41,13 +46,25 @@ categories, price, ads, orders, questions, taxes... e o dashboard do vendedor
 é um agregado gigante ("faturamento por cidade, últimos 90 dias, agrupado por
 semana"). Essas queries pesadas competem por CPU/lock com as escritas.
 
-![Leituras pesadas indo para réplica](frames/02-leitura-pesada-read-replica.png)
+```mermaid
+flowchart LR
+    S[Server] -->|Leitura| DB[(Database)]
+    S --> Q["SELECT com 10+ JOINs<br/>dashboard com agregações<br/>LIKE 'capa celular'"]:::warn
+    classDef warn fill:#3a1a1a,color:#fff
+```
 
 ## Primeira tentativa (que NÃO é CQRS): read replicas
 
 A saída óbvia: jogar as leituras para **réplicas de leitura** do banco.
 
-![Master + réplicas](frames/03-master-e-replicas.png)
+```mermaid
+flowchart LR
+    S[Server] -->|Escrita| M[(Master<br/>Database)]
+    M -.replicação.-> R1[(Réplica 1)]
+    M -.replicação.-> R2[(Réplica 2)]
+    M -.replicação.-> R3[(Réplica 3)]
+    S -->|"Leitura (queries pesadas)"| R1
+```
 
 Isso ajuda — escrita vai pro master, leitura pras réplicas. **Mas o vídeo
 deixa claro: isso não é CQRS.** Por quê? Porque a réplica tem **exatamente o
@@ -60,14 +77,22 @@ contenção, não a complexidade da consulta.
 **Command Query Responsibility Segregation** = "segregação da responsabilidade
 de comando e consulta". Dois caminhos separados:
 
-![CQRS completo](frames/07-cqrs-diagrama-completo.png)
+```mermaid
+flowchart LR
+    GW[API Gateway] -->|comandos| WS[Write Service]
+    GW -->|consultas| RS[Read Service]
+    WS -->|Escritas| WDB[(Write Database<br/>normalizado)]
+    WS -->|publica evento| K{{Kafka / fila}}
+    K --> WK[Worker<br/>consome a fila]
+    WK -->|projeta| RDB[(Read Database<br/>desnormalizado)]
+    RS -->|Leituras| RDB
+    RDB -.-> O["MongoDB · Elasticsearch ·<br/>Cassandra · Redis · ScyllaDB"]
+```
 
 - **Lado do comando (write)**: recebe "cadastra produto", "muda preço",
   "baixa estoque". Escreve num banco normalizado (o "Write Database").
 - **O evento**: depois de gravar, o write service avisa o mundo — publica numa
   fila/tópico (Kafka no vídeo, SNS+SQS na nossa demo).
-
-![Write service publicando no Kafka](frames/06-write-service-publica-kafka.png)
 
 - **O worker**: consome a fila e monta o **Read Database** — desnormalizado,
   no formato exato que a tela precisa (sem JOIN). Pode ser MongoDB,
@@ -75,7 +100,12 @@ de comando e consulta". Dois caminhos separados:
   escrever.
 - **Lado da consulta (read)**: só faz `SELECT` simples no modelo pronto.
 
-![CDC — change data capture](frames/04-cdc-change-data-capture.png)
+```mermaid
+flowchart LR
+    WS[Write Service] -->|Escritas| WDB[(Write Database)]
+    WDB -->|"log de transações (WAL/binlog)"| CDC[Debezium<br/>Change Data Capture]
+    CDC --> K{{Kafka / fila}} --> WK[Worker] --> RDB[(Read Database)]
+```
 
 Existe ainda a variante com **CDC/Debezium**: em vez do serviço publicar o
 evento, uma ferramenta lê o *log de transações* do banco de escrita e gera os

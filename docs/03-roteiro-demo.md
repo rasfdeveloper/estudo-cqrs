@@ -28,7 +28,7 @@ DynamoDB, o tópico SNS e a fila SQS. É a "infra da AWS" local.
 
 ## 1. O "antes" — tradicional num banco só
 
-Mostrar `docs/frames/01-arquitetura-tradicional.png`.
+Mostrar o diagrama "arquitetura tradicional" em `docs/01-para-leigos.md`.
 
 > Pergunta: *"se o SELECT de dashboard trava o banco, quem sofre?"* (as escritas).
 
@@ -92,7 +92,7 @@ ser eventual).
 
 ## 6. Fechamento
 
-- Mostrar `docs/frames/07-cqrs-diagrama-completo.png` ao lado do
+- Mostrar o diagrama CQRS em `docs/01-para-leigos.md` ao lado do
   `docker compose ps` — cada caixinha do diagrama existe na demo.
 - Ler o checklist "quando não usar" em `02-para-experientes.md`.
 

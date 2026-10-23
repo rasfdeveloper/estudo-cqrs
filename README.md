@@ -13,7 +13,7 @@ do Renato Augusto (YouTube), com uma **simulação prática local** usando
 | `docs/02-para-experientes.md` | Explicação para quem já manja de arquitetura (trade-offs, CDC, Event Sourcing) |
 | `docs/03-roteiro-demo.md` | **Roteiro passo a passo** para rodar a demo ao vivo |
 | `docs/transcricao.md` | Transcrição completa do vídeo (auto-legendas do YouTube) |
-| `docs/frames/` | Capturas dos diagramas de arquitetura do vídeo, em ordem |
+| — | Diagramas de arquitetura recriados em Mermaid dentro dos docs |
 | `docker-compose.yml` | Floci + init (cria tabelas/filas) + worker de projeção |
 | `demo/` | `write_service.py` (comandos), `projection_worker.py` (SQS→read model), `read_service.py` (queries) |
 | `scripts/init.sh` | Cria a infra: 2 tabelas DynamoDB + tópico SNS + fila SQS |
