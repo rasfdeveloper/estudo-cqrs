@@ -1,4 +1,4 @@
-video/
-frames/
+/video/
+/frames/
 *.srt
 __pycache__/
