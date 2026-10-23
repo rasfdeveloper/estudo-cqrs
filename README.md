@@ -20,23 +20,16 @@ do Renato Augusto (YouTube), com uma **simulação prática local** usando
 
 ## Arquitetura simulada
 
-```
-                 ┌─────────────────┐
-   comando ────▶ │  write_service  │────▶ products-write (DynamoDB)
-  (criar/preco/  └────────┬────────┘         modelo de ESCRITA
-   estoque)               │ publica evento
-                          ▼
-                     SNS product-events
-                          │
-                          ▼
-                     SQS product-events-queue
-                          │
-                          ▼
-                 ┌─────────────────┐
-                 │projection_worker│────▶ products-read (DynamoDB)
-                 └─────────────────┘         modelo de LEITURA desnormalizado
-                          ▲
-   consulta ───▶  read_service
+```mermaid
+flowchart LR
+    U([comando: criar / preco / estoque]) --> WS[write_service<br/>lado COMMAND]
+    WS -->|grava| WDB[(products-write<br/>DynamoDB<br/>modelo normalizado)]
+    WS -->|publica evento| SNS{{SNS product-events}}
+    SNS --> SQS{{SQS product-events-queue}}
+    SQS --> W[projection_worker<br/>consome a fila]
+    W -->|projeta| RDB[(products-read<br/>DynamoDB<br/>modelo desnormalizado)]
+    RDB --> RS[read_service<br/>lado QUERY]
+    RS --> Q([consulta: get / list])
 ```
 
 O papel do Kafka/Debezium do vídeo é feito aqui por **SNS + SQS**; os bancos
